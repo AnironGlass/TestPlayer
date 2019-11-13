@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Test Player</string>
+    <string name="media_player">MediaPlayer</string>
+    <string name="media_player_surface_view">MediaPlayer + SurfaceView</string>
+    <string name="media_player_gl_surface_view">MediaPlayer + GLSurfaceView</string>
+    <string name="media_player_texture_view">MediaPlayer + TextureView</string>
+    <string name="web_view">WebView</string>
+    <string name="google_chrome">Google Chrome</string>
+    <string name="play">Play</string>
+    <string name="pause">Pause</string>
+    <string name="stop">Stop</string>
+    <string name="no_data_source">No data source to play</string>
+    <string name="delete">Delete</string>
+    <string name="not_installed">Not installed</string>
+</resources>

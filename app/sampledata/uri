@@ -1,0 +1,15 @@
+http://example.com/hls_01.m3u8
+https://example.com/medium/medium/medium/medium/uri_01.mp4
+udp://example.com:1000/
+https://example.com/long/long/long/long/long/long/long/long/long/long/long/long/long/uri_01.mp4
+http://example.com/hls_02.m3u8
+udp://example.com:10014/
+http://example.com/hls_03.m3u8
+https://example.com/medium/medium/medium/medium/uri_02.mp4
+udp://example.com:1002/
+http://example.com/hls_04.m3u8
+udp://example.com:1003/
+https://example.com/medium/medium/medium/medium/uri_03.mp4
+http://example.com/hls_05.m3u8
+udp://example.com:1004/
+http://example.com/hls_06.m3u8

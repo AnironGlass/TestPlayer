@@ -1,0 +1,48 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion global.compileSdk
+    defaultConfig {
+        applicationId app.applicationId
+        minSdkVersion global.minSdk
+        targetSdkVersion global.targetSdk
+        versionCode app.versionCode
+        versionName app.versionName
+        archivesBaseName = "${app.archivesBaseName}-${versionName}"
+        testInstrumentationRunner global.testRunner
+        resConfigs global.resConfigs
+    }
+    signingConfigs {
+        debugKey {
+            storeFile file(System.getenv("DEBUG_KEYSTORE"))
+            storePassword System.getenv("DEBUG_KEYSTORE_PASS")
+            keyAlias System.getenv("DEBUG_KEY_ALIAS")
+            keyPassword System.getenv("DEBUG_KEYSTORE_PASS")
+        }
+    }
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debugKey
+            debuggable true
+        }
+        release {
+            signingConfig signingConfigs.debugKey
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+
+    // Android extended libraries
+    compileOnly "androidx.annotation:annotation:$versions.androidx_annotation"
+
+    // Test libraries
+    testImplementation "junit:junit:$versions.junit4"
+
+    // Android test libraries
+    androidTestImplementation "androidx.test.ext:junit:$versions.androidx_junit"
+    androidTestImplementation "androidx.test.espresso:espresso-core:$versions.androidx_espresso"
+}

@@ -1,0 +1,36 @@
+ext.global = [
+        minSdk                      : 23,
+        targetSdk                   : 29,
+        compileSdk                  : 29,
+        resConfigs                  : 'en',
+        testRunner                  : "androidx.test.runner.AndroidJUnitRunner",
+]
+
+ext.app = [
+        applicationId               : 'com.anironglass.testplayer',
+        archivesBaseName            : 'TestPlayer',
+        versionCode                 : 1,
+        versionName                 : '1.0',
+]
+
+ext.versions = [
+        // Plugins
+        androidGradlePlugin         : '3.5.1',
+
+        // Android extended libraries
+        androidx_annotation         : '1.1.0',
+
+        // Test libraries
+        junit4                      : '4.12',
+
+        // Android test libraries
+        androidx_junit              : '1.1.1',
+        androidx_espresso           : '3.2.0',
+]
+
+@SuppressWarnings("GroovyUnusedDeclaration")
+static def addRepositories(RepositoryHandler handler) {
+    handler.google()
+    handler.jcenter()
+}
+ext.addRepositories = this.&addRepositories

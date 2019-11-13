@@ -1,0 +1,23 @@
+ext.config = "$rootProject.projectDir/_config/"
+
+apply from: "$config/versions.gradle"
+
+buildscript {
+    // Gradle will not find vars defined in an external file when referring to them
+    // in the buildscript block, unless you link it from the buildscript block, too.
+    apply from: "$rootProject.projectDir/_config/versions.gradle"
+
+    addRepositories(repositories)
+
+    dependencies {
+        classpath "com.android.tools.build:gradle:$versions.androidGradlePlugin"
+    }
+}
+
+allprojects {
+    addRepositories(repositories)
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
