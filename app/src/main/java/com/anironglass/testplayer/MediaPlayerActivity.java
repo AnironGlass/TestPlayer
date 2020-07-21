@@ -119,6 +119,18 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
         setVideoSize(mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight());
         populateAudioTracks();
         play();
+        logTracks(mediaPlayer.getTrackInfo());
+    }
+
+    private void logTracks(@Nullable MediaPlayer.TrackInfo[] tracks) {
+        if (null == tracks) {
+            Log.d(TAG, "logTracks() -- no tracks");
+        } else {
+            for (int index = 0; index < tracks.length; index++) {
+                MediaPlayer.TrackInfo track = tracks[index];
+                Log.d(TAG, "track [" + index + "] " + track);
+            }
+        }
     }
 
     @Override
