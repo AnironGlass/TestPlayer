@@ -3,4 +3,5 @@
     <dimen name="player_padding">16dp</dimen>
     <dimen name="control_button_width">96dp</dimen>
     <dimen name="control_button_margin">10dp</dimen>
+    <dimen name="min_track_spinner_width">200dp</dimen>
 </resources>

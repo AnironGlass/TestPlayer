@@ -5,4 +5,5 @@
     <color name="primary_alpha_30">#4d4d83b3</color>
     <color name="primary_alpha_10">#1a4d83b3</color>
     <color name="tvWhite">#f1f1f1</color>
+    <color name="content_block_background">#80FFFFFF</color>
 </resources>

@@ -14,17 +14,23 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.TextureView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.IntDef;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -34,7 +40,8 @@ import static com.anironglass.testplayer.PickerActivity.TAG;
 public class MediaPlayerActivity extends BasePlayerActivity implements
         MediaPlayer.OnPreparedListener,
         MediaPlayer.OnErrorListener,
-        MediaPlayer.OnVideoSizeChangedListener {
+        MediaPlayer.OnVideoSizeChangedListener,
+        MediaPlayer.OnCompletionListener {
 
     static final String EXTRA_DRAW_VIEW_TYPE = "type";
     static final int TYPE_SURFACE_VIEW = -1;
@@ -51,11 +58,13 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
     }
 
     private final MediaPlayer mediaPlayer = new MediaPlayer();
+    private TrackSpinnerAdapter audioSpinnerAdapter;
     private FrameLayout rootView;
     private TextView playPauseButton;
     private View drawView;
     private Surface surface;
-    @DrawViewType private int drawViewType = TYPE_SURFACE_VIEW;
+    @DrawViewType
+    private int drawViewType = TYPE_SURFACE_VIEW;
     private boolean isPrepared = false;
     private boolean isPlaying = false;
     private int viewPortWidth;
@@ -95,6 +104,7 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
             mediaPlayer.setOnPreparedListener(this);
             mediaPlayer.setOnErrorListener(this);
             mediaPlayer.setOnVideoSizeChangedListener(this);
+            mediaPlayer.setOnCompletionListener(this);
             mediaPlayer.prepareAsync();
         } catch (IOException e) {
             e.printStackTrace();
@@ -107,6 +117,7 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
         Log.d(TAG, "onPrepared()");
         isPrepared = true;
         setVideoSize(mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight());
+        populateAudioTracks();
         play();
     }
 
@@ -124,6 +135,11 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
         setVideoSize(width, height);
     }
 
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        clearAudioTracks();
+    }
+
     private void initializeView() {
         rootView = new FrameLayout(this);
         rootView.setBackgroundColor(getColor(R.color.tvWhite));
@@ -134,11 +150,12 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
 
         initializeDrawView(rootView, drawViewType);
         initializeControlsView(rootView);
+        initializeAudioTracksView(rootView);
 
         rootView.post(new Runnable() {
             @Override
             public void run() {
-                viewPortWidth = rootView.getWidth()- rootView.getPaddingLeft() - rootView.getPaddingRight();
+                viewPortWidth = rootView.getWidth() - rootView.getPaddingLeft() - rootView.getPaddingRight();
                 viewPortHeight = rootView.getHeight() - rootView.getPaddingTop() - rootView.getPaddingBottom();
                 viewPortProportion = (float) viewPortWidth / viewPortHeight;
                 videoProportion = viewPortProportion;
@@ -227,6 +244,101 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
         rootView.addView(controlsContainer, controlsParams);
     }
 
+    private void initializeAudioTracksView(@NonNull FrameLayout rootView) {
+        FrameLayout.LayoutParams contentParams = new FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+        );
+        contentParams.gravity = Gravity.TOP | Gravity.END;
+        int margin = getResources().getDimensionPixelOffset(R.dimen.control_button_margin);
+        contentParams.setMargins(margin, margin, margin, margin);
+
+        LinearLayout.LayoutParams itemParams = new LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.WRAP_CONTENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+        );
+
+        LinearLayout contentLayout = new LinearLayout(
+                new ContextThemeWrapper(this, R.style.ContentBlockStyle)
+        );
+        contentLayout.setOrientation(LinearLayout.VERTICAL);
+
+        TextView textView = new TextView(new ContextThemeWrapper(this, R.style.SpinnerTitle));
+        textView.setText(R.string.audio_tracks);
+
+        Spinner audioSpinner = new Spinner(this);
+        audioSpinnerAdapter = new TrackSpinnerAdapter(this);
+        audioSpinner.setAdapter(audioSpinnerAdapter);
+        audioSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(
+                    AdapterView<?> parent,
+                    View view,
+                    int position,
+                    long id
+            ) {
+                handleTrackSelection(audioSpinnerAdapter.getItem(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+                // empty
+            }
+        });
+        // Do this programmatically because form styles it works incorrectly
+        audioSpinner.setBackgroundResource(R.drawable.spinner_background);
+        audioSpinner.setMinimumWidth(
+                getResources().getDimensionPixelOffset(R.dimen.min_track_spinner_width)
+        );
+
+        contentLayout.addView(textView, itemParams);
+        contentLayout.addView(audioSpinner, itemParams);
+        rootView.addView(contentLayout, contentParams);
+    }
+
+    private void clearAudioTracks() {
+        audioSpinnerAdapter.clear();
+        audioSpinnerAdapter.notifyDataSetChanged();
+    }
+
+    private void populateAudioTracks() {
+        clearAudioTracks();
+
+        List<PlayerTrack> audioTracks = getAudioTracks();
+        audioSpinnerAdapter.addAll(audioTracks);
+        audioSpinnerAdapter.notifyDataSetChanged();
+    }
+
+    private void handleTrackSelection(@Nullable PlayerTrack playerTrack) {
+        if (playerTrack == null) return;
+        mediaPlayer.selectTrack(playerTrack.getIndex());
+    }
+
+    @NonNull
+    private List<PlayerTrack> getAudioTracks() {
+        List<PlayerTrack> result = new ArrayList<>();
+        MediaPlayer.TrackInfo[] trackInfos = mediaPlayer.getTrackInfo();
+        if (trackInfos == null) return result;
+        for (int i = 0; i < trackInfos.length; i++) {
+            MediaPlayer.TrackInfo trackInfo = trackInfos[i];
+            if (trackInfo.getTrackType() != MediaPlayer.TrackInfo.MEDIA_TRACK_TYPE_AUDIO) {
+                continue;
+            }
+            result.add(toPlayerTrack(i, trackInfo));
+        }
+        return result;
+    }
+
+    private PlayerTrack toPlayerTrack(
+            int index,
+            @NonNull MediaPlayer.TrackInfo trackInfo
+    ) {
+        return new PlayerTrack(
+                index,
+                trackInfo.getLanguage()
+        );
+    }
+
     private void playPause() {
         if (isPlaying) {
             pause();
@@ -256,6 +368,7 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
     private void stop() {
         Log.d(TAG, "stop()");
         playPauseButton.setText(R.string.play);
+        clearAudioTracks();
         mediaPlayer.stop();
         isPrepared = false;
         isPlaying = false;
@@ -264,6 +377,7 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
     private void release() {
         Log.d(TAG, "release()");
         playPauseButton.setText(R.string.play);
+        clearAudioTracks();
         mediaPlayer.release();
         isPrepared = false;
         isPlaying = false;
@@ -306,19 +420,28 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
         }
 
         @Override
-        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) { }
+        public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+        }
 
         @Override
         public void surfaceDestroyed(SurfaceHolder holder) {
             Log.d(TAG, "surfaceDestroyed()");
-            mediaPlayer.release();
+            release();
         }
     }
 
     private class GLSurfaceViewRenderer implements GLSurfaceView.Renderer {
-        @Override public void onSurfaceCreated(GL10 gl, EGLConfig config) { }
-        @Override public void onSurfaceChanged(GL10 gl, int width, int height) { }
-        @Override public void onDrawFrame(GL10 gl) { }
+        @Override
+        public void onSurfaceCreated(GL10 gl, EGLConfig config) {
+        }
+
+        @Override
+        public void onSurfaceChanged(GL10 gl, int width, int height) {
+        }
+
+        @Override
+        public void onDrawFrame(GL10 gl) {
+        }
     }
 
     private class SurfaceTextureListener implements TextureView.SurfaceTextureListener {
@@ -337,10 +460,12 @@ public class MediaPlayerActivity extends BasePlayerActivity implements
         }
 
         @Override
-        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) { }
+        public void onSurfaceTextureSizeChanged(SurfaceTexture surface, int width, int height) {
+        }
 
         @Override
-        public void onSurfaceTextureUpdated(SurfaceTexture surface) { }
+        public void onSurfaceTextureUpdated(SurfaceTexture surface) {
+        }
     }
 
 }

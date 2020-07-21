@@ -1,5 +1,7 @@
 <resources>
-    <style name="AppTheme" parent="android:Theme.DeviceDefault.Light.DarkActionBar"/>
+    <style name="AppTheme" parent="android:Theme.DeviceDefault.Light.DarkActionBar">
+        <item name="android:listChoiceBackgroundIndicator">@drawable/spinner_popup_item_background</item>
+    </style>
 
     <style name="Dialog" parent="android:Theme.DeviceDefault.Light.NoActionBar">
         <item name="android:backgroundDimAmount">0.5</item>
@@ -25,6 +27,18 @@
         <item name="android:textStyle">bold</item>
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textAllCaps">true</item>
+        <item name="android:focusable">true</item>
+    </style>
+
+    <style name="ContentBlockStyle">
+        <item name="android:padding">16dp</item>
+        <item name="android:showDividers">middle</item>
+        <item name="android:divider">@drawable/content_divider</item>
+        <item name="android:background">@drawable/content_block_background</item>
+    </style>
+
+    <style name="SpinnerTitle" parent="android:Widget.Material.Light.TextView">
+        <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
     </style>
 
 </resources>

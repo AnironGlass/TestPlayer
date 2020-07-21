@@ -12,4 +12,5 @@
     <string name="no_data_source">No data source to play</string>
     <string name="delete">Delete</string>
     <string name="not_installed">Not installed</string>
+    <string name="audio_tracks">Audio tracks</string>
 </resources>
