@@ -15,7 +15,7 @@ ext.app = [
 
 ext.versions = [
         // Plugins
-        androidGradlePlugin         : '3.5.1',
+        androidGradlePlugin         : '4.0.1',
 
         // Android extended libraries
         androidx_annotation         : '1.1.0',
