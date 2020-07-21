@@ -5,7 +5,7 @@
 
     <uses-feature
         android:name="android.software.leanback"
-        android:required="true" />
+        android:required="false" />
     <uses-feature
         android:name="android.hardware.touchscreen"
         android:required="false" />
@@ -30,6 +30,7 @@
             android:name="com.anironglass.testplayer.PickerActivity"
             android:launchMode="singleInstance"
             android:theme="@style/Dialog"
+            android:screenOrientation="landscape"
             >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
